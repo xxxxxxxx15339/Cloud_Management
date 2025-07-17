@@ -1,177 +1,226 @@
-# 🌩️ Mini-Projet C++ — Simulateur d’Infrastructure Cloud Minimaliste
+## 🗓️ Day 0 (Prep)
 
-*“Tout comprendre, tout construire, tout analyser… en **1 semaine**”*
+1. **Repo & toolchain**
 
----
+   * Create a new GitHub repo and clone it.
+   * Add a `LICENSE` (MIT) and initial empty `README.md`.
+   * Scaffold a CMake project:
 
-## 1 · Contexte général
+     ```
+     mkdir build && cd build
+     cmake ..
+     ```
+   * Ensure you can `cmake --build .` and run a dummy `main()`.
 
-La consigne universitaire (Imad Kissami, avril 2025) demande de **modéliser une plate-forme cloud simplifiée** : serveurs → pods → conteneurs, gérés par un scheduler façon *Kubernetes*, avec métriques exportables et gestion d’erreurs robuste.
-Le prolongement “Suite” ajoute exceptions personnalisées, export fichier, templates et lambdas.
+2. **Dependencies**
 
-### Pourquoi ce mini-projet vaut de l’or ?
+   * Install SQLite dev headers (`libsqlite3-dev`), GoogleTest, Python (for Pandas).
+   * Add a `requirements.txt` for your notebook:
 
-| Compétence              | Ce que vous pratiquerez                                | Utilité CV                  |
-| ----------------------- | ------------------------------------------------------ | --------------------------- |
-| **Modern C++ 17/20**    | RAII, smart pointers, exceptions, templates, STL algos | Entretien dev système       |
-| **Design OOP**          | Architecture multi-niveaux, polymorphisme              | Questions “design a system” |
-| **SQL + SQLite**        | Schéma relationnel, requêtes analytiques               | Postes data/BI              |
-| **Pandas + Matplotlib** | Dashboard ressources, heat-maps                        | Stages data-science         |
-
----
-
-## 2 · Modèle conceptuel
-
-```
-Resource (abstract)
-│  id_, cpu_, memory_, active_
-├─ Container  (image_)
-├─ Server     (available_cpu_, available_mem_)
-└─ (Pod is not a Resource but owns Containers)
-
-KubernetesCluster
-├─ nodes_ : vector<shared_ptr<Server>>
-└─ pods_  : vector<unique_ptr<Pod>>
-```
-
-* Toute ressource possède `start()`, `stop()` et `getMetrics()` (étape 1).
-* **Pod** agrège des `Container`, déploie l’ensemble, expose ses métriques (étape 3).
-* **Server** gère un pool CPU/RAM, alloue via `allocate()` et peut être actif ou inactif (étape 4).
-* **KubernetesCluster** choisit un serveur via `schedulePod()` et orchestre tout (étape 5).
+     ```txt
+     pandas
+     matplotlib
+     sqlite3
+     jupyter
+     ```
 
 ---
 
-## 3 · Parcours détaillé des 14 étapes obligatoires
+## 📐 Day 1 – Steps 1–3: Core types & Resource abstraction
 
-| #      | Tâche                       | Points d’attention                                                               |
-| ------ | --------------------------- | -------------------------------------------------------------------------------- |
-| **1**  | `Resource` abstraite        | Constructeur protégé, destructeur virtuel, *pas d’état statique*                 |
-| **2**  | `Container`                 | Surcharger `<<` et `getMetrics()` (même format)                                  |
-| **3**  | `Pod`                       | Stocker `unique_ptr<Container>`, labels `unordered_map`                          |
-| **4**  | `Server`                    | `allocate()` retourne *bool* ; maj des champs disponibles ; exceptions (étape 9) |
-| **5**  | `KubernetesCluster`         | Implémenter `schedulePod()` (first-fit), `getMetrics()` agrégé                   |
-| **6**  | `Cloud_Util`                | `display()` + `deployPods()` (boucle + messages)                                 |
-| **7**  | `main.cpp` démo & tests 0-3 | Script complet fourni dans le PDF                                                |
-| **8**  | Exceptions perso            | `CloudException → AllocationException / FileException`                           |
-| **9**  | Exceptions intégrées        | Lever/catcher `AllocationException` dans `allocate` et `deployPod`               |
-| **10** | Export métriques            | `saveClusterMetrics(cluster,"file.txt")` + `FileException`                       |
-| **11** | `deployPods` robuste        | Continue après exception, vide le vecteur                                        |
-| **12** | Affichage aligné            | `ostringstream`, `setw`, `left` dans tous les `getMetrics()`                     |
-| **13** | `MetricLogger<T>`           | Template écrivant `obj.getMetrics()` vers n’importe quel flux                    |
-| **14** | Lambdas utilitaires         | `getFilteredServers`, `forEachContainer`, tri des pods avec `std::sort`          |
+1. **`Resource` (abstract)**
 
----
+   * Header `Resource.hpp`:
 
-## 4 · Feuille de route **1 semaine**
+     ```cpp
+     class Resource {
+     protected:
+       Resource(std::string id, double cpu, double mem);
+       virtual ~Resource();
+     public:
+       virtual void start() = 0;
+       virtual void stop()  = 0;
+       virtual std::string getMetrics() const = 0;
+     };
+     ```
+   * Implement ctor/dtor, store `id_`, `cpu_`, `mem_`, `active_`.
 
-| Jour  | Livrable                    | Focus C++                           | Focus Data              |
-| ----- | --------------------------- | ----------------------------------- | ----------------------- |
-| **1** | Étapes 1–3                  | RAII, smart pointers                | —                       |
-| **2** | Étapes 4–5                  | Algorithmes STL, polymorphisme      | —                       |
-| **3** | Étapes 6–7 + tests PDF      | I/O stream, `ostream<<`             | —                       |
-| **4** | Exceptions (8-9)            | `try/catch`, hiérarchie d’erreurs   | —                       |
-| **5** | Export (10-11-12)           | `fstream`, formatage                | CSV généré              |
-| **6** | Templates & lambdas (13-14) | `template<class T>`, `<functional>` | Début notebook Pandas   |
-| **7** | SQLite + notebook           | API C `sqlite3`, schéma + INSERT    | Visualisation, heat-map |
+2. **`Container`**
 
----
+   * Inherit from `Resource`. Add `image_`.
+   * Override `start()`, `stop()`.
+   * `getMetrics()` returns `"Container[id] cpu:… mem:… active:…"`
+   * Overload `operator<<` for streams.
 
-## 5 · Approfondissements pour **SQL** et **Pandas**
+3. **`Pod` skeleton**
 
-### 5.1 Schéma de persistance
+   * Class `Pod` holds `std::vector<std::unique_ptr<Container>>` and `std::unordered_map<std::string,std::string>` labels.
+   * Methods `addContainer()`, `startAll()`, `stopAll()`, `getMetrics()`.
 
-```sql
-CREATE TABLE servers(
-  id TEXT PRIMARY KEY,
-  total_cpu REAL, total_mem REAL,
-  free_cpu  REAL, free_mem  REAL,
-  active INTEGER
-);
+4. **Write unit tests** (GoogleTest) for each of the above:
 
-CREATE TABLE pods(
-  name TEXT PRIMARY KEY,
-  server_id TEXT,
-  FOREIGN KEY(server_id) REFERENCES servers(id)
-);
-
-CREATE TABLE containers(
-  id TEXT PRIMARY KEY,
-  pod_name TEXT,
-  cpu REAL, mem REAL, image TEXT,
-  FOREIGN KEY(pod_name) REFERENCES pods(name)
-);
-```
-
-### 5.2 Requêtes utiles
-
-**CPU > 80 %**
-
-```sql
-SELECT id,
-       100*(1 - free_cpu/total_cpu) AS cpu_usage
-FROM   servers
-WHERE  cpu_usage > 80;
-```
-
-**Images les plus gourmandes**
-
-```sql
-SELECT image,
-       SUM(mem) AS mem_total
-FROM   containers
-GROUP  BY image
-ORDER  BY mem_total DESC
-LIMIT  3;
-```
-
-### 5.3 Analyse Pandas
-
-```python
-import pandas as pd, matplotlib.pyplot as plt, sqlite3
-
-con = sqlite3.connect('data/cluster.db')
-df  = pd.read_sql('SELECT * FROM servers', con, parse_dates=['timestamp'])
-df['cpu_used'] = df.total_cpu - df.free_cpu
-
-(df.pivot_table(index='timestamp',
-                columns='id',
-                values='cpu_used')
-   .plot(title='CPU Used per Server'))
-
-plt.show()
-```
+   * Create an empty container, start it, inspect metrics string.
+   * Pod with 2 containers → `getMetrics()` contains both.
 
 ---
 
-## 6 · Conseils d’implémentation approfondis
+## 🖥️ Day 2 – Steps 4–5: Server & Scheduler
 
-| Sujet                | Bonnes pratiques                                                        |
-| -------------------- | ----------------------------------------------------------------------- |
-| **Ownership**        | `unique_ptr` pour conteneurs, `shared_ptr` pour serveurs                |
-| **Scheduler**        | *First-fit* : premier serveur actif suffisant                           |
-| **Exception safety** | Utiliser `make_unique` / `make_shared`, catcher par référence constante |
-| **MetricLogger**     | Header-only :<br>`template<class T> struct MetricLogger { … }`          |
-| **Tests**            | GoogleTest ou `assert` ; reproduire les tests du PDF                    |
+1. **`Server`**
+
+   * Inherit from `Resource`. Add `available_cpu_`, `available_mem_`.
+   * Method `bool allocate(double cpu, double mem)`
+
+     * If enough free → subtract & return `true`, else throw `AllocationException`.
+   * `getMetrics()` reports free vs total.
+
+2. **`KubernetesCluster`**
+
+   * Holds `std::vector<std::shared_ptr<Server>> nodes_;` and `std::vector<std::unique_ptr<Pod>> pods_;`
+   * Implement `schedulePod(std::unique_ptr<Pod> p)`:
+
+     * Loop nodes with first-fit; on success call `p->startAll()`, store pod.
+     * On failure of all, throw `AllocationException`.
+
+3. **Tests**
+
+   * Create 2 servers (4 CPU each), a pod with two containers (2+3 CPU) → first goes on server1, second on server2.
+   * Assert exceptions thrown when oversubscribed.
 
 ---
 
-## 7 · Stretch-Goals (facultatifs mais formateurs)
+## 📊 Day 3 – Steps 6–7: CLI & demo
 
-1. **Thread-Pool** : planifier `deployPod` en parallèle avec `std::jthread`.
-2. **JSON export** : remplacer CSV par `nlohmann::json`.
-3. **REST API** : exposer `GET /metrics` via Pistache ou Crow.
-4. **Heat-map mémoire** Pandas : visualiser `mem_used` par serveur & timestamp.
+1. **`CloudUtil`**
+
+   * Static `void display(const KubernetesCluster&)` prints metrics.
+   * `void deployPods(KubernetesCluster&, std::vector<std::unique_ptr<Pod>>& pods)` loops through all, catches exceptions and continues.
+
+2. **`main.cpp`**
+
+   * Parse a simple JSON or hard-coded list of pod specs.
+   * Call `deployPods()`, then `display()`.
+   * Wire up `argc/argv` for an input file path (stretch).
+
+3. **Acceptance tests**
+
+   * “Smoke test” script:
+
+     ```sh
+     ./cloudsim pods.json | grep “Server[0-9]” 
+     ```
+   * Ensure exit code `0`.
 
 ---
 
-## 8 · Checklist finale avant rendu
+## 🚨 Day 4 – Steps 8–9: Exceptions
 
-* [ ] Compilation via CMake + make sans warnings.
-* [ ] `main.cpp` reproduit **exactement** les sorties d’exemple.
-* [ ] `cluster1_metrics.txt` ou `cluster.db` généré.
-* [ ] README, diagrammes PlantUML, notebook `.ipynb` committés.
-* [ ] GitHub Actions CI vert (build + tests).
+1. **Define**
 
-> **Mot de la fin:** en 7 jours, vous passerez d’un squelette OOP à une mini-plate-forme cloud instrumentée et analysable. Gardez le périmètre strict, écrivez des tests chaque soir, et ajoutez les bonus uniquement lorsque les 14 étapes sont **100 % stables**.
+   ```cpp
+   struct CloudException : std::exception { ... };
+   struct AllocationException : CloudException { ... };
+   struct FileException       : CloudException { ... };
+   ```
 
-Bon code ! 🚀
+2. **Throw & catch**
+
+   * In `Server::allocate()`, throw `AllocationException("…")`.
+   * In `KubernetesCluster::schedulePod`, wrap with try/catch to rethrow or log.
+   * In `CloudUtil::deployPods`, catch `AllocationException`, log and continue.
+
+3. **Unit tests**
+
+   * Verify correct exception types propagate and are caught.
+
+---
+
+## 💾 Day 5 – Steps 10–12: Metrics export & formatting
+
+1. **`saveClusterMetrics(cluster, "file.txt")`**
+
+   * Open `std::ofstream`; on failure throw `FileException`.
+   * Write each server and pod metrics line by line.
+
+2. **Robust `deployPods`**
+
+   * After catching an exception, clear the pod vector so you don’t retry the same pod.
+
+3. **Aligned output**
+
+   * Use `std::ostringstream`, `std::setw()`, `std::left` to align columns in both console and file.
+
+4. **Manual test**
+
+   * Run, open `file.txt`, visually verify neat columns.
+
+---
+
+## 🧩 Day 6 – Steps 13–14: Templates & Lambdas
+
+1. **`MetricLogger<T>` template**
+
+   * In a header-only file:
+
+     ```cpp
+     template<class T>
+     struct MetricLogger {
+       std::ostream& os_;
+       MetricLogger(std::ostream& os): os_(os) {}
+       void log(const T& obj) { os_ << obj.getMetrics() << "\n"; }
+     };
+     ```
+   * Test with `Container`, `Server`, `Pod`.
+
+2. **Utility lambdas**
+
+   * `auto getFilteredServers = [&](double cpuThreshold){…};` returns vector of servers above threshold.
+   * `auto forEachContainer = [&](auto&& fn){…};` invokes `fn(container)` for all containers in cluster.
+   * Use `std::sort` and lambdas to sort pods by total CPU usage.
+
+3. **Mini-demo** in `main.cpp` showing these utilities in action.
+
+---
+
+## 📚 Day 7 – SQLite & Pandas notebook
+
+1. **SQLite schema**
+
+   * Create `cluster.db` and run the DDL from §5.1 to make `servers`, `pods`, `containers` tables.
+
+2. **Export into DB**
+
+   * Write a function `void persistCluster(const KubernetesCluster&, sqlite3* db)`
+
+     * Insert all servers, pods, containers.
+     * Wrap errors in `FileException`.
+
+3. **Jupyter notebook**
+
+   * In `analysis.ipynb`, connect with
+
+     ```python
+     import sqlite3, pandas as pd
+     con = sqlite3.connect('cluster.db')
+     servers = pd.read_sql('SELECT * FROM servers', con)
+     ```
+   * Reproduce the example heat-map / time-series plots.
+
+4. **Final polish**
+
+   * Add diagrams (PlantUML) to `README.md`: class and sequence diagrams.
+   * Configure **GitHub Actions**: build, test, coverage, lint.
+   * Add badges (build | tests | coverage | license).
+
+---
+
+### ✅ After Week: Final Checklist
+
+* [ ] All 14 steps implemented, tested, and documented.
+* [ ] CMake build passes on Linux & Windows.
+* [ ] GitHub Actions green.
+* [ ] `cluster.db` + `analysis.ipynb` in repo.
+* [ ] README with quickstart, diagrams, badges.
+* [ ] Blog post link or demo video (optional but highly recommended).
+
+Bonne chance ! 🚀
