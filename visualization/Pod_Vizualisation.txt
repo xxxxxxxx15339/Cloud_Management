@@ -1,0 +1,38 @@
+┌─────────────────────────────────────────────┐
+│                    Pod                      │
+│─────────────────────────────────────────────│
+│ labels: { "app":"ecommerce", "tier":"web" } │
+│                                             │
+│ ┌─────────────┐   ┌─────────────┐           │ 
+│ │ Container A │   │ Container B │           │
+│ │(nginx:1.19) │   │(log-sidecar)│           │
+│ └─────────────┘   └─────────────┘           │
+│                                             │
+└─────────────────────────────────────────────┘
+
+Container A peut être votre serveur web.
+Container B peut être un agent de log ou de métriques.
+
+Les deux partagent :
+        - Les mêmes adresses réseau internes (localhost).
+        - Le même volume de configurations ou certificats.
+        - Les mêmes labels pour les retrouver ou les scaler en groupe.
+
+Cohérence opérationnelle :
+Vous traitez un front-end + son side-car comme une seule unité : vous êtes sûrs 
+qu’ils démarrent et s’arrêtent ensemble.
+
+Simplicité de scheduling :
+Le scheduler (notre KubernetesCluster) place 1 Pod sur un serveur, 
+calculant la somme des besoins CPU/RAM de tous ses conteneurs d’un coup.
+
+Étiquetage et gestion :
+Plutôt que de gérer individuellement chaque conteneur, 
+vous appliquez des règles (scaling, mises à jour, monitoring) au niveau du Pod, 
+ce qui est plus ergonomique et proche de la réalité de Kubernetes.
+
+
+
+
+
+

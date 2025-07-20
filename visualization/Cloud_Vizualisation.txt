@@ -1,0 +1,48 @@
+                     ┌──────────────────┐
+                     │   «abstract»     │
+                     │    Resource      │
+                     │──────────────────│
+                     │– id_: string     │
+                     │– cpu_: double    │
+                     │– mem_: double    │
+                     │– active_: bool   │
+                     │ + start()        │
+                     │ + stop()         │
+                     │ + getMetrics()   │
+                     └───────┬──────────┘
+                             │
+           ┌─────────────────┴─────────────────┐
+           │                                   │
+┌─────────────────────┐             ┌─────────────────────┐
+│      Server         │             │    Container        │
+│─────────────────────│             │─────────────────────│
+│– available_cpu_:dbl │             │– image_: string     │
+│– available_mem_:dbl │             │                     │
+│ + allocate(cpu,mem) │             │                     │
+│ + getMetrics()      │             │ + getMetrics()      │
+└─────────────────────┘             │ + operator<<        │
+                                    └─────────────────────┘
+
+      (Pod is *not* a Resource)
+┌─────────────────────────────────────────────────────┐
+│                       Pod                           │
+│─────────────────────────────────────────────────────│
+│– containers_: vector<unique_ptr<Container>>         │
+│– labels_:      unordered_map<string,string>         │
+│ + addContainer(c)                                   │
+│ + startAll()    → calls each container->start()     │
+│ + stopAll()     → calls each container->stop()      │
+│ + getMetrics()  → aggregates all containers’ metrics│
+└─────────────────────────────────────────────────────┘
+
+┌────────────────────────────────────────────────────┐
+│                KubernetesCluster                   │
+│────────────────────────────────────────────────────│
+│– nodes_: vector<shared_ptr<Server>>                │
+│– pods_:  vector<unique_ptr<Pod>>                   │
+│ + schedulePod(pod)  → first‐fit onto a Server,then │
+│                      pod->startAll() and store it  │
+│ + getMetrics()      → aggregate across all servers │
+│ + deployPods(list)  → try schedule each, catch     │
+│                      AllocationException and cont. │
+└────────────────────────────────────────────────────┘
