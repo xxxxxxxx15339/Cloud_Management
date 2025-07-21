@@ -212,15 +212,534 @@
    * Configure **GitHub Actions**: build, test, coverage, lint.
    * Add badges (build | tests | coverage | license).
 
+## 🗓️ Day 8 – Expose a REST/gRPC Control API
+
+**Goal:**
+Give external clients a clear, machine‑readable way to list servers/pods, schedule new pods, and query metrics.
+
+**Technologies Used:**
+
+* **OpenAPI (YAML):** Standard format to describe RESTful HTTP APIs.
+* **gRPC & Protocol Buffers:** High‑performance RPC framework with strongly‑typed messages.
+* **swagger-cli:** Validates & bundles OpenAPI specs.
+* **protoc:** Compiles `.proto` files into C++ stubs.
+* **cpp-httplib / Pistache:** Header‑only C++ HTTP server libraries.
+* **gRPC C++ library:** Official gRPC implementation in C++.
+* **Dredd / Schemathesis:** Contract‑testing tools for REST.
+* **grpcurl:** CLI to exercise gRPC endpoints.
+
+**Step‑by‑Step Guide:**
+
+1. **Design your API**
+
+   * REST: create `api/openapi.yaml` with paths `/servers` (GET), `/schedule` (POST), response schemas.
+   * gRPC: create `api/control.proto` with service methods:
+
+     ```proto
+     syntax = "proto3";
+     service Control {
+       rpc ListServers(Empty) returns (ServerList);
+       rpc SchedulePod(PodSpec) returns (ScheduleResult);
+     }
+     ```
+
+2. **Validate & generate code**
+
+   * REST:
+
+     ```bash
+     npm install -g @apidevtools/swagger-cli
+     swagger-cli validate api/openapi.yaml
+     ```
+   * gRPC:
+
+     ```bash
+     protoc \
+       --proto_path=api \
+       --cpp_out=gen \
+       --grpc_out=gen \
+       --plugin=protoc-gen-grpc=$(which grpc_cpp_plugin) \
+       api/control.proto
+     ```
+
+3. **Add server library**
+
+   * REST (`cpp-httplib`):
+
+     ```bash
+     git submodule add https://github.com/yhirose/cpp-httplib.git extern/httplib
+     ```
+
+     In `CMakeLists.txt`: `add_subdirectory(extern/httplib)` and link `httplib::httplib`.
+   * gRPC:
+
+     ```cmake
+     find_package(gRPC CONFIG REQUIRED)
+     find_package(Protobuf CONFIG REQUIRED)
+     ```
+
+     Link `grpc++` and `protobuf::libprotobuf`.
+
+4. **Implement handlers**
+
+   * **REST example** (`src/api.cpp`):
+
+     ```cpp
+     httplib::Server svr;
+     svr.Get("/servers", [&](auto&, auto& res){
+       res.set_content(cluster.getAllMetrics(), "text/plain");
+     });
+     svr.Post("/schedule", [&](auto& req, auto& res){
+       PodSpec spec = parseJson(req.body);
+       auto result = cluster.schedulePod(spec);
+       res.set_content(result.toJson(), "application/json");
+     });
+     svr.listen("0.0.0.0", 8080);
+     ```
+   * **gRPC example**:
+
+     ```cpp
+     class ControlServiceImpl final : public Control::Service {
+       Status ListServers(ServerContext*, const Empty*, ServerList* out) override {
+         *out = cluster.toProto();
+         return Status::OK;
+       }
+       // ...
+     };
+     ```
+
+5. **Build & run**
+
+   ```bash
+   cd build && cmake .. && make
+   ./cloudsim_api
+   ```
+
+   Test with:
+
+   ```bash
+   curl http://localhost:8080/servers
+   grpcurl -plaintext localhost:50051 Control.ListServers
+   ```
+
+6. **Write contract tests**
+
+   * **REST:** create `dredd.yml` pointing to your spec and `http://localhost:8080`, then `dredd`.
+   * **gRPC:** script calls each RPC via `grpcurl` and checks for `OK`.
+
 ---
 
-### ✅ After Week: Final Checklist
+## 🗓️ Day 9 – Containerize & Kubernetes Deployment
 
-* [ ] All 14 steps implemented, tested, and documented.
-* [ ] CMake build passes on Linux & Windows.
-* [ ] GitHub Actions green.
-* [ ] `cluster.db` + `analysis.ipynb` in repo.
-* [ ] README with quickstart, diagrams, badges.
-* [ ] Blog post link or demo video (optional but highly recommended).
+**Goal:**
+Package your app in Docker and run it in a local Kubernetes cluster to demonstrate cloud‑native deployment.
+
+**Technologies Used:**
+
+* **Docker CE:** Build container images.
+* **kind / k3s:** Lightweight local Kubernetes cluster.
+* **Kubernetes manifests:** YAML for Deployment & Service.
+* **Helm:** Templating engine for Kubernetes resources.
+
+**Step‑by‑Step Guide:**
+
+1. **Write a multi‑stage Dockerfile**
+
+   ```dockerfile
+   # Builder stage
+   FROM ubuntu:24.04 AS builder
+   RUN apt update && apt install -y build-essential cmake libsqlite3-dev
+   WORKDIR /app
+   COPY . .
+   RUN mkdir build && cd build && cmake .. && make
+
+   # Runtime stage
+   FROM ubuntu:24.04
+   RUN apt update && apt install -y libsqlite3-0
+   COPY --from=builder /app/build/cloudsim_api /usr/local/bin/cloudsim_api
+   EXPOSE 8080
+   ENTRYPOINT ["cloudsim_api"]
+   ```
+
+2. **Build & test image**
+
+   ```bash
+   docker build -t cloudsim:latest .
+   docker run --rm -p 8080:8080 cloudsim:latest
+   curl http://localhost:8080/servers
+   ```
+
+3. **Install kind**
+
+   ```bash
+   curl -Lo kind https://kind.sigs.k8s.io/dl/v0.21.0/kind-linux-amd64
+   chmod +x kind && mv kind /usr/local/bin/
+   kind create cluster --name cloudsim-cluster
+   ```
+
+4. **Write Kubernetes manifests** (`k8s/deployment.yaml`, `k8s/service.yaml`):
+
+   ```yaml
+   # deployment.yaml
+   apiVersion: apps/v1
+   kind: Deployment
+   metadata: { name: cloudsim }
+   spec:
+     replicas: 1
+     selector: { matchLabels: { app: cloudsim } }
+     template:
+       metadata: { labels: { app: cloudsim } }
+       spec:
+         containers:
+           - name: cloudsim
+             image: cloudsim:latest
+             ports: [{ containerPort: 8080 }]
+   ```
+
+   ```yaml
+   # service.yaml
+   apiVersion: v1
+   kind: Service
+   metadata: { name: cloudsim-svc }
+   spec:
+     type: NodePort
+     selector: { app: cloudsim }
+     ports: [{ port: 8080, targetPort: 8080 }]
+   ```
+
+5. **Deploy to kind**
+
+   ```bash
+   kubectl apply -f k8s/deployment.yaml
+   kubectl apply -f k8s/service.yaml
+   kubectl get pods
+   ```
+
+6. **(Optional) Helm packaging**
+
+   ```bash
+   helm create cloudsim-chart
+   ```
+
+   Move your YAML into `cloudsim-chart/templates/` and configure `values.yaml`, then:
+
+   ```bash
+   helm install cloudsim ./cloudsim-chart
+   ```
+
+---
+
+## 🗓️ Day 10 – Observability & Monitoring
+
+**Goal:**
+Instrument your service so you can collect real‑time metrics and visualize them, proving you understand production‑grade observability.
+
+**Technologies Used:**
+
+* **prometheus-cpp:** C++ client to expose Prometheus metrics.
+* **Prometheus:** Metrics collection & alerting.
+* **Grafana:** Dashboarding & visualization.
+* **Alertmanager:** Handle and route alerts.
+
+**Step‑by‑Step Guide:**
+
+1. **Add prometheus-cpp**
+
+   ```bash
+   git submodule add https://github.com/jupp0r/prometheus-cpp.git extern/prom-cpp
+   ```
+
+   In CMakeLists, add and link `prometheus-cpp`.
+
+2. **Instrument code**
+
+   ```cpp
+   auto registry = std::make_shared<prometheus::Registry>();
+   prometheus::Exposer exposer{"0.0.0.0:9100"};
+   exposer.RegisterCollectable(registry);
+
+   auto& cpu_gauge = prometheus::BuildGauge()
+     .Name("server_cpu_free")
+     .Register(*registry)
+     .Add({{"server", id_}});
+   cpu_gauge.Set(available_cpu_);
+   ```
+
+3. **Run Prometheus**
+
+   ```bash
+   # prometheus.yml scrapes http://localhost:9100/metrics
+   docker run -d --name prometheus -p 9090:9090 \
+     -v $(pwd)/prometheus.yml:/etc/prometheus/prometheus.yml \
+     prom/prometheus
+   ```
+
+4. **Run Grafana**
+
+   ```bash
+   docker run -d --name grafana -p 3000:3000 grafana/grafana
+   ```
+
+   * Log in (admin/admin).
+   * Add Prometheus as data source.
+   * Build a dashboard plotting `server_cpu_free`.
+
+5. **Configure alerts**
+   In `prometheus.yml`:
+
+   ```yaml
+   rule_files:
+     - "alert.rules.yml"
+   ```
+
+   In `alert.rules.yml`:
+
+   ```yaml
+   groups:
+     - name: allocation.rules
+       rules:
+         - alert: AllocationFailures
+           expr: increase(allocation_failures[5m]) > 0
+           for: 1m
+   ```
+
+---
+
+## 🗓️ Day 11 – Performance Testing & Benchmarking
+
+**Goal:**
+Measure and guarantee performance of core operations, and prevent regressions.
+
+**Technologies Used:**
+
+* **Google Benchmark:** Micro‑benchmarking C++ code.
+* **k6 OSS:** Load‑testing HTTP endpoints.
+* **GitHub Actions:** Automate benchmarks in CI.
+
+**Step‑by‑Step Guide:**
+
+1. **Add Google Benchmark**
+
+   ```bash
+   git submodule add https://github.com/google/benchmark.git extern/benchmark
+   ```
+
+   In CMakeLists, link `benchmark` and `benchmark_main`.
+
+2. **Write a benchmark** (`benchmarks/allocate_benchmark.cpp`):
+
+   ```cpp
+   static void BM_Allocate(benchmark::State& st) {
+     Server s("s1", 100, 100);
+     for (auto _ : st) s.allocate(1,1);
+   }
+   BENCHMARK(BM_Allocate);
+   BENCHMARK_MAIN();
+   ```
+
+3. **Build & run**
+
+   ```bash
+   cd build && cmake .. && make benchmarks
+   ./benchmarks --benchmark_report_aggregates_only=true
+   ```
+
+4. **Load test with k6**
+
+   ```bash
+   npm install -g k6
+   ```
+
+   Create `load_test.js`:
+
+   ```js
+   import http from 'k6/http';
+   export default () => { http.get('http://localhost:8080/servers'); };
+   ```
+
+   Run:
+
+   ```bash
+   k6 run --vus 50 --duration 30s load_test.js
+   ```
+
+5. **CI integration**
+   In `.github/workflows/ci.yml`, add steps to build & run `./benchmarks`, and fail if average latency exceeds your threshold.
+
+---
+
+## 🗓️ Day 12 – Security & Robustness
+
+**Goal:**
+Harden your code with fuzzing, sanitizers, and static analysis to catch bugs early.
+
+**Technologies Used:**
+
+* **libFuzzer / AFL++:** Automated fuzz testing.
+* **Address & Undefined Behavior Sanitizers:** Catch memory errors at runtime.
+* **clang‑tidy & cppcheck:** Static code analysis.
+
+**Step‑by‑Step Guide:**
+
+1. **Enable sanitizers** in your `CMakeLists.txt`:
+
+   ```cmake
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address,undefined -fno-omit-frame-pointer")
+   ```
+
+2. **Write a fuzz harness** (`fuzz/fuzz_schedule.cpp`):
+
+   ```cpp
+   extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
+     std::string s((char*)data, size);
+     try { cluster.schedulePod(parsePodSpec(s)); } catch(...) {}
+     return 0;
+   }
+   ```
+
+   Compile with `-fsanitize=fuzzer,address`.
+
+3. **Run static analysis**
+
+   ```bash
+   clang-tidy src/*.cpp -- -std=c++17
+   cppcheck --enable=all src/
+   ```
+
+4. **Guard against malformed input**
+   Wrap your JSON parsing:
+
+   ```cpp
+   try {
+     auto j = nlohmann::json::parse(input);
+   } catch (nlohmann::json::exception& e) {
+     // log error and return HTTP 400 / gRPC error
+   }
+   ```
+
+---
+
+## 🗓️ Day 13 – Infra‑as‑Code & Cloud Deployment
+
+**Goal:**
+Provision and manage your entire infrastructure (K8s cluster, database, storage) as code.
+
+**Technologies Used:**
+
+* **Terraform OSS:** Declarative IaC to spin up resources.
+* **Helm Provider / Kubernetes Provider:** Terraform plugins for K8s.
+* **GitHub Actions:** Automate `terraform apply` & deployments.
+
+**Step‑by‑Step Guide:**
+
+1. **Install Terraform CLI** (v1.5+).
+
+2. **Create `infra/main.tf`**:
+
+   ```hcl
+   provider "kubernetes" { /* use kubeconfig to point at your cluster */ }
+
+   resource "kubernetes_namespace" "cloudsim" {
+     metadata { name = "cloudsim" }
+   }
+
+   resource "kubernetes_deployment" "app" {
+     metadata { name = "cloudsim"; namespace = kubernetes_namespace.cloudsim.metadata[0].name }
+     spec { /* copy from k8s/deployment.yaml */ }
+   }
+   ```
+
+3. **Initialize & apply**:
+
+   ```bash
+   cd infra
+   terraform init
+   terraform apply -auto-approve
+   ```
+
+4. **Migrate to Postgres (optional)**
+
+   * Use Terraform’s **Helm provider** to install the official Postgres chart.
+   * Update your code to use `libpq` (C++) or `psycopg2` (Python).
+
+5. **GitHub Actions automation** (`.github/workflows/infra.yml`):
+
+   ```yaml
+   on: push
+   jobs:
+     terraform:
+       runs-on: ubuntu-latest
+       steps:
+         - uses: actions/checkout@v3
+         - uses: hashicorp/setup-terraform@v2
+           with: terraform_version: 1.5.0
+         - run: terraform init
+         - run: terraform apply -auto-approve
+   ```
+
+---
+
+## 🗓️ Day 14 – Technical Writing & Demo
+
+**Goal:**
+Document your architecture decisions, diagrams, and produce a polished demo to showcase end‑to‑end mastery.
+
+**Technologies Used:**
+
+* **ADR (Markdown):** Simple records of architecture decisions.
+* **PlantUML:** Text‑based UML diagrams.
+* **GitHub Pages & Reveal.js:** Free hosting for slide decks.
+* **OBS Studio:** Open‑source screen recording.
+
+**Step‑by‑Step Guide:**
+
+1. **Create ADRs** under `docs/adr/` using this template:
+
+   ```markdown
+   # ADR 0001: Choose cpp-httplib for REST
+   Date: 2025‑07‑21
+
+   ## Context
+   …
+
+   ## Decision
+   …
+
+   ## Consequences
+   …
+   ```
+
+2. **Draw PlantUML diagrams**
+
+   * `docs/diagrams/class.puml`:
+
+     ```puml
+     @startuml
+     class Server {
+       - available_cpu_: double
+       + allocate(cpu,mem)
+     }
+     @enduml
+     ```
+   * Generate PNG: `plantuml docs/diagrams/class.puml`
+
+3. **Publish slides**
+
+   * Initialize a Reveal.js template in `slides/`.
+   * In repo settings, enable GitHub Pages from `gh-pages` branch.
+   * Push slides; they’ll be live at `https://<your‑user>.github.io/<repo>/`.
+
+4. **Record a 30 s demo**
+
+   * Install **OBS Studio**.
+   * Capture:
+
+     1. `kubectl apply …` or `helm install …`
+     2. `curl` or `grpcurl` output
+     3. Grafana dashboard
+   * Export MP4 and link it in your README under **Demo Video**.
+
+---
+
 
 Bonne chance ! 🚀
