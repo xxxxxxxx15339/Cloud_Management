@@ -1,0 +1,5 @@
+--> Go to Ubuntu : wsl
+cd build
+cmake ..
+cmake --build .
+ctest --output-on-failure
