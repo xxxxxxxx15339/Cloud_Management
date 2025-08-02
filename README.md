@@ -20,10 +20,6 @@
 
 # Cloud Management System
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
-[![C++ Version](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](https://isocpp.org/)
-[![CMake Version](https://img.shields.io/badge/CMake-3.14+-green.svg)](https://cmake.org/)
-
 <div align="center">
 
 **C++ Kubernetes-style cluster simulator for resource management & pod scheduling**
@@ -223,7 +219,8 @@ Distributed under the MIT License. See [LICENSE](./LICENSE) for details.
 
 ## Author
 
-**Your Name** – [GitHub](https://github.com/yourusername)
+**Yasser BAOUZIL** – [GitHub](https://github.com/xxxxxxxx15339)
+
 
 
 
