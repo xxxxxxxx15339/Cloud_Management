@@ -20,6 +20,7 @@ public:
 
     string getMetrics() const override;
     friend ostream& operator<<(ostream& os, const Container& c);
+
 };
 
 #endif

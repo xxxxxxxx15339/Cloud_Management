@@ -1,6 +1,8 @@
 #include "Pod.hpp"
 
-Pod::Pod() = default;
+Pod::Pod(string name)
+    : name_(name) {};
+
 Pod::~Pod() = default;
 
 void Pod::addContainer(unique_ptr<Container> c) {
@@ -9,6 +11,10 @@ void Pod::addContainer(unique_ptr<Container> c) {
 
 void Pod::setLabel(const string& key, const string& value) {
     labels_[key] = value;
+}
+
+void Pod::setName(const string& s) {
+    name_ = s;
 }
 
 void Pod::startAll() {
@@ -50,3 +56,12 @@ ostream& operator<<(ostream& os, const Pod& p) {
     return os;
 }
 
+vector<unique_ptr<Container>>& Pod::getContainers() noexcept {
+    return containers_;
+};
+unordered_map<string, string>& Pod::getLabels() noexcept {
+    return labels_;
+};
+string Pod::getName() {
+    return name_;
+}

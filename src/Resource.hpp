@@ -17,6 +17,11 @@ public:
 
     // Get all the information (including active)
     virtual string getMetrics() const = 0;
+
+    // Getters
+    string getId() const;
+    double getCpu() const; 
+    double getMem() const;
     
 protected:
     string id_;

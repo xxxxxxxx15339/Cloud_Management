@@ -16,16 +16,22 @@ class Pod {
         vector<unique_ptr<Container>> containers_;
         unordered_map<string, string> labels_; // cle/valeur que l'on attache a un Pod
     public:
-        Pod();
+        Pod(string name);
         ~Pod();
 
         void addContainer(unique_ptr<Container> c);
         void setLabel(const string& key, const string& value);
+        void setName(const string& s);
         void startAll();
         void stopAll();
 
         string getMetrics() const;
         friend ostream& operator<<(ostream& os, const Pod& p);
+
+        // Getters 
+        vector<unique_ptr<Container>>& getContainers() noexcept;
+        unordered_map<string, string>& getLabels() noexcept;
+        string getName();
 };
 
 

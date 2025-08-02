@@ -5,3 +5,15 @@ Resource::Resource(string id, double cpu, double mem)
 {}
 
 Resource::~Resource() = default;
+
+string Resource::getId() const {
+    return id_;
+};
+
+double Resource::getCpu() const {
+    return cpu_;
+};
+ 
+double Resource::getMem() const {
+    return mem_;
+};
