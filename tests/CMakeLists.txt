@@ -16,10 +16,10 @@ foreach(src_file IN LISTS TEST_SOURCES)
     get_filename_component(test_name ${src_file} NAME_WE)
     add_executable(${test_name} ${src_file})
     
-    # 4. On lie à la fois cloudsim et GoogleTest
+    # 4. On lie à la fois cloudsim_lib et GoogleTest
     target_link_libraries(${test_name}
         PRIVATE
-            cloudsim
+            cloudsim_lib
             gtest
             gtest_main
     )
