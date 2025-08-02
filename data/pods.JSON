@@ -1,0 +1,62 @@
+[
+    {
+      "name": "web-pod",
+      "labels": { "app": "web", "tier": "frontend" },
+      "containers": [
+        {
+          "id": "web-container-1",
+          "cpu": 1.0,
+          "mem": 0.5,
+          "image": "nginx:latest"
+        },
+        {
+          "id": "web-sidecar-1",
+          "cpu": 0.5,
+          "mem": 0.25,
+          "image": "fluentd:latest"
+        }
+      ]
+    },
+    {
+      "name": "db-pod",
+      "labels": { "app": "database", "tier": "backend" },
+      "containers": [
+        {
+          "id": "db-container-1",
+          "cpu": 2.0,
+          "mem": 2.0,
+          "image": "mysql:8"
+        },
+        {
+          "id": "db-backup-1",
+          "cpu": 0.5,
+          "mem": 0.5,
+          "image": "mysql-backup:latest"
+        },
+        {
+          "id": "db-monitor-1",
+          "cpu": 0.25,
+          "mem": 0.125,
+          "image": "prometheus:latest"
+        }
+      ]
+    },
+    {
+      "name": "api-pod",
+      "labels": { "app": "api", "tier": "backend" },
+      "containers": [
+        {
+          "id": "api-container-1",
+          "cpu": 1.5,
+          "mem": 1.0,
+          "image": "node:16"
+        },
+        {
+          "id": "api-cache-1",
+          "cpu": 0.5,
+          "mem": 0.25,
+          "image": "redis:alpine"
+        }
+      ]
+    }
+]
