@@ -11,15 +11,32 @@
 <blockquote>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.0-blue.svg">
-  <img src="https://img.shields.io/badge/C%2B%2B-17-blue.svg">
-  <img src="https://img.shields.io/badge/license-MIT-yellow.svg">
-  <img src="https://img.shields.io/badge/pandas-✔-blue.svg?logo=pandas&logoColor=white">
-  <img src="https://img.shields.io/badge/matplotlib-✔-orange.svg?logo=matplotlib&logoColor=white">
-  <img src="https://img.shields.io/badge/sqlite3-✔-yellow.svg?logo=sqlite&logoColor=white">
-  <img src="https://img.shields.io/badge/jupyter-✔-f37626.svg?logo=jupyter&logoColor=white">
-  <img src="https://github.com/xxxxxxxx15339/Cloud_Management/actions/workflows/ci.yml/badge.svg">
-  <img src="https://img.shields.io/badge/Kubernetes-326CE5?style=flat-square&logo=kubernetes&logoColor=white" alt="Kubernetes" />
+<!-- Version, Language, License -->
+<img src="https://img.shields.io/badge/version-1.0-blue.svg" alt="Version" />
+<img src="https://img.shields.io/badge/C++17-blue.svg?logo=c%2B%2B&logoColor=white" alt="C++17" />
+<img src="https://img.shields.io/badge/license-MIT-yellow.svg" alt="License" />
+
+<!-- Tools / Libraries -->
+<img src="https://img.shields.io/badge/pandas-✔-blue.svg?logo=pandas&logoColor=white" alt="Pandas" />
+<img src="https://img.shields.io/badge/matplotlib-✔-orange.svg?logo=matplotlib&logoColor=white" alt="Matplotlib" />
+<img src="https://img.shields.io/badge/sqlite3-✔-yellow.svg?logo=sqlite&logoColor=white" alt="SQLite3" />
+<img src="https://img.shields.io/badge/jupyter-✔-f37626.svg?logo=jupyter&logoColor=white" alt="Jupyter" />
+<img src="https://img.shields.io/badge/json-✔-green.svg?logo=json&logoColor=white" alt="JSON" />
+
+<!-- Domain-specific Tags -->
+<img src="https://img.shields.io/badge/Kubernetes-326CE5?style=flat-square&logo=kubernetes&logoColor=white" alt="Kubernetes" />
+<img src="https://img.shields.io/badge/Cloud--Management-00ACC1?style=flat-square&logo=cloud&logoColor=white" alt="Cloud Management" />
+<img src="https://img.shields.io/badge/Simulation-009688?style=flat-square&logo=gear&logoColor=white" alt="Simulation" />
+<img src="https://img.shields.io/badge/Cluster--Scheduling-607D8B?style=flat-square&logo=buffer&logoColor=white" alt="Cluster Scheduling" />
+<img src="https://img.shields.io/badge/Resource--Allocation-795548?style=flat-square&logo=matrix&logoColor=white" alt="Resource Allocation" />
+<img src="https://img.shields.io/badge/Systems--Programming-673AB7?style=flat-square&logo=terminal&logoColor=white" alt="Systems Programming" />
+<img src="https://img.shields.io/badge/Smart--Pointers-3F51B5?style=flat-square&logo=code&logoColor=white" alt="Smart Pointers" />
+<img src="https://img.shields.io/badge/CMake-064F8C?style=flat-square&logo=cmake&logoColor=white" alt="CMake" />
+<img src="https://img.shields.io/badge/Google--Test-34A853?style=flat-square&logo=google&logoColor=white" alt="Google Test" />
+
+<!-- GitHub Actions (already added) -->
+<img src="https://github.com/xxxxxxxx15339/Cloud_Management/actions/workflows/ci.yml/badge.svg" alt="CI Status" />
+
 </p>
 
 </blockquote>
@@ -241,6 +258,7 @@ Distributed under the MIT License. See [LICENSE](./LICENSE) for details.
 ## Author
 
 **Yasser BAOUZIL** – [GitHub](https://github.com/xxxxxxxx15339)
+
 
 
 
