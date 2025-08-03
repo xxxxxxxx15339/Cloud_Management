@@ -46,6 +46,39 @@ mkdir build && cd build
 cmake ..
 make
 ```
+## Project Structure
+
+```
+Cloud_Management/
+├── src/                    # Main source code
+│   ├── main.cpp           # Entry point and pod creation
+│   ├── CloudUtil.cpp      # Utility functions (display, deployPods)
+│   ├── KubernetesCluster.cpp  # Cluster management and scheduling
+│   ├── Pod.cpp            # Pod implementation and container management
+│   ├── Container.cpp      # Container resource handling
+│   ├── Server.cpp         # Server resource allocation
+│   ├── Resource.cpp       # Base resource class
+│   └── Exceptions.cpp     # Custom exception classes
+├── tests/                 # Unit tests
+│   ├── test_Cluster.cpp   # KubernetesCluster tests
+│   ├── test_Server.cpp    # Server allocation tests
+│   ├── test_Pod.cpp       # Pod management tests
+│   ├── test_Container.cpp # Container tests
+│   └── test_Resource.cpp  # Resource base class tests
+├── data/                  # Configuration files
+│   └── pods.JSON          # Pod specifications in JSON format
+├── external/              # External dependencies
+│   └── googletest/        # Google Test framework
+└── docs/                  # Documentation and architecture
+```
+
+## Dependencies
+
+- **C++17**: Modern C++ features and smart pointers
+- **CMake 3.14+**: Build system configuration
+- **Google Test**: Unit testing framework
+- **nlohmann/json**: JSON parsing library (optional)
+
 
 ## Usage
 
@@ -186,38 +219,6 @@ Or run individual test components:
    git push origin feature/my-change
    ```
 
-## Project Structure
-
-```
-Cloud_Management/
-├── src/                    # Main source code
-│   ├── main.cpp           # Entry point and pod creation
-│   ├── CloudUtil.cpp      # Utility functions (display, deployPods)
-│   ├── KubernetesCluster.cpp  # Cluster management and scheduling
-│   ├── Pod.cpp            # Pod implementation and container management
-│   ├── Container.cpp      # Container resource handling
-│   ├── Server.cpp         # Server resource allocation
-│   ├── Resource.cpp       # Base resource class
-│   └── Exceptions.cpp     # Custom exception classes
-├── tests/                 # Unit tests
-│   ├── test_Cluster.cpp   # KubernetesCluster tests
-│   ├── test_Server.cpp    # Server allocation tests
-│   ├── test_Pod.cpp       # Pod management tests
-│   ├── test_Container.cpp # Container tests
-│   └── test_Resource.cpp  # Resource base class tests
-├── data/                  # Configuration files
-│   └── pods.JSON          # Pod specifications in JSON format
-├── external/              # External dependencies
-│   └── googletest/        # Google Test framework
-└── docs/                  # Documentation and architecture
-```
-
-## Dependencies
-
-- **C++17**: Modern C++ features and smart pointers
-- **CMake 3.14+**: Build system configuration
-- **Google Test**: Unit testing framework
-- **nlohmann/json**: JSON parsing library (optional)
 
 ## Motivation & What I Learned
 
@@ -239,6 +240,7 @@ Distributed under the MIT License. See [LICENSE](./LICENSE) for details.
 ## Author
 
 **Yasser BAOUZIL** – [GitHub](https://github.com/xxxxxxxx15339)
+
 
 
 
