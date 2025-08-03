@@ -30,11 +30,9 @@
 
 <div align="center">
 
-**C++ Kubernetes-style cluster simulator for resource management & pod scheduling**
-
 </div>
 
-Is cloud resource management too complex? Want something that actually works? Try **Cloud Management System**—a C++ application that simulates Kubernetes-style pod scheduling, resource allocation, and cluster metrics visualization.
+Cloud resource management is complex — this project offers a working simulation to explore it.
 
 ## Installation
 
@@ -241,6 +239,7 @@ Distributed under the MIT License. See [LICENSE](./LICENSE) for details.
 ## Author
 
 **Yasser BAOUZIL** – [GitHub](https://github.com/xxxxxxxx15339)
+
 
 
 
