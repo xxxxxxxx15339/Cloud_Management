@@ -14,7 +14,6 @@
 <!-- Consistent badge style: flat-square, with logos -->
 
 <!-- Version, License -->
-<img src="https://img.shields.io/badge/version-1.0-007EC6?style=flat-square" alt="Version" />
 <img src="https://img.shields.io/badge/license-MIT-yellow?style=flat-square" alt="MIT License" />
 
 <!-- Languages & Tools -->
@@ -32,9 +31,6 @@
 <!-- Domains -->
 <img src="https://img.shields.io/badge/Kubernetes-326CE5?style=flat-square&logo=kubernetes&logoColor=white" alt="Kubernetes" />
 <img src="https://img.shields.io/badge/Smart--Pointers-3F51B5?style=flat-square&logo=code&logoColor=white" alt="Smart Pointers" />
-<img src="https://img.shields.io/badge/Simulation-009688?style=flat-square&logo=gear&logoColor=white" alt="Simulation" />
-<img src="https://img.shields.io/badge/Cloud--Management-00ACC1?style=flat-square&logo=cloud&logoColor=white" alt="Cloud Management" />
-<img src="https://img.shields.io/badge/Systems--Programming-673AB7?style=flat-square&logo=terminal&logoColor=white" alt="Systems Programming" />
 
 <!-- CI Badge -->
 <img src="https://github.com/xxxxxxxx15339/Cloud_Management/actions/workflows/ci.yml/badge.svg?style=flat-square" alt="CI Status" />
@@ -260,6 +256,7 @@ Distributed under the MIT License. See [LICENSE](./LICENSE) for details.
 ## Author
 
 **Yasser BAOUZIL** – [GitHub](https://github.com/xxxxxxxx15339)
+
 
 
 
