@@ -25,11 +25,6 @@
 
 <!-- Domain-specific Tags -->
 <img src="https://img.shields.io/badge/Kubernetes-326CE5?style=flat-square&logo=kubernetes&logoColor=white" alt="Kubernetes" />
-<img src="https://img.shields.io/badge/Cloud--Management-00ACC1?style=flat-square&logo=cloud&logoColor=white" alt="Cloud Management" />
-<img src="https://img.shields.io/badge/Simulation-009688?style=flat-square&logo=gear&logoColor=white" alt="Simulation" />
-<img src="https://img.shields.io/badge/Cluster--Scheduling-607D8B?style=flat-square&logo=buffer&logoColor=white" alt="Cluster Scheduling" />
-<img src="https://img.shields.io/badge/Resource--Allocation-795548?style=flat-square&logo=matrix&logoColor=white" alt="Resource Allocation" />
-<img src="https://img.shields.io/badge/Systems--Programming-673AB7?style=flat-square&logo=terminal&logoColor=white" alt="Systems Programming" />
 <img src="https://img.shields.io/badge/Smart--Pointers-3F51B5?style=flat-square&logo=code&logoColor=white" alt="Smart Pointers" />
 <img src="https://img.shields.io/badge/CMake-064F8C?style=flat-square&logo=cmake&logoColor=white" alt="CMake" />
 <img src="https://img.shields.io/badge/Google--Test-34A853?style=flat-square&logo=google&logoColor=white" alt="Google Test" />
@@ -258,6 +253,7 @@ Distributed under the MIT License. See [LICENSE](./LICENSE) for details.
 ## Author
 
 **Yasser BAOUZIL** – [GitHub](https://github.com/xxxxxxxx15339)
+
 
 
 
