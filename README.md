@@ -14,6 +14,8 @@
 ![matplotlib](https://img.shields.io/badge/matplotlib-✔-orange.svg?logo=matplotlib&logoColor=white)
 ![sqlite3](https://img.shields.io/badge/sqlite3-✔-yellow.svg?logo=sqlite&logoColor=white)
 ![jupyter](https://img.shields.io/badge/jupyter-✔-f37626.svg?logo=jupyter&logoColor=white)
+![CI](https://github.com/yourusername/Cloud_Management/actions/workflows/ci.yml/badge.svg)
+
 
 
 </div>
@@ -220,6 +222,7 @@ Distributed under the MIT License. See [LICENSE](./LICENSE) for details.
 ## Author
 
 **Yasser BAOUZIL** – [GitHub](https://github.com/xxxxxxxx15339)
+
 
 
 
