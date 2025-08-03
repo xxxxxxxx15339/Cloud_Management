@@ -19,6 +19,7 @@
   <img src="https://img.shields.io/badge/sqlite3-✔-yellow.svg?logo=sqlite&logoColor=white">
   <img src="https://img.shields.io/badge/jupyter-✔-f37626.svg?logo=jupyter&logoColor=white">
   <img src="https://github.com/xxxxxxxx15339/Cloud_Management/actions/workflows/ci.yml/badge.svg">
+  <img src="https://img.shields.io/badge/Kubernetes-326CE5?style=flat-square&logo=kubernetes&logoColor=white" alt="Kubernetes" />
 </p>
 
 </blockquote>
@@ -240,6 +241,7 @@ Distributed under the MIT License. See [LICENSE](./LICENSE) for details.
 ## Author
 
 **Yasser BAOUZIL** – [GitHub](https://github.com/xxxxxxxx15339)
+
 
 
 
