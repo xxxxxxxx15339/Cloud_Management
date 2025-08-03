@@ -215,6 +215,19 @@ Cloud_Management/
 - **Google Test**: Unit testing framework
 - **nlohmann/json**: JSON parsing library (optional)
 
+## Motivation & What I Learned
+
+This project was built as a hands-on way to deepen my understanding of distributed systems, Kubernetes scheduling strategies, and C++17 resource management. I wanted to simulate a real-world orchestration system to practice:
+
+- Abstraction using smart pointers and polymorphism
+- Exception-safe resource allocation
+- Cluster-wide scheduling logic
+- Test-driven development using Google Test
+- Writing maintainable and modular C++ code
+
+By simulating pods, containers, and servers, I’ve learned how infrastructure decisions translate into code — and how small architectural choices affect scalability and reliability.
+
+
 ## License
 
 Distributed under the MIT License. See [LICENSE](./LICENSE) for details.
@@ -222,6 +235,7 @@ Distributed under the MIT License. See [LICENSE](./LICENSE) for details.
 ## Author
 
 **Yasser BAOUZIL** – [GitHub](https://github.com/xxxxxxxx15339)
+
 
 
 
