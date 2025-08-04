@@ -22,10 +22,7 @@
 <img src="https://img.shields.io/badge/Google--Test-34A853?style=flat-square&logo=google&logoColor=white" alt="Google Test" />
 
 <!-- Libraries -->
-<img src="https://img.shields.io/badge/pandas-130754?style=flat-square&logo=pandas&logoColor=white" alt="pandas" />
-<img src="https://img.shields.io/badge/matplotlib-11557C?style=flat-square&logo=matplotlib&logoColor=white" alt="matplotlib" />
 <img src="https://img.shields.io/badge/sqlite3-003B57?style=flat-square&logo=sqlite&logoColor=white" alt="SQLite3" />
-<img src="https://img.shields.io/badge/jupyter-F37626?style=flat-square&logo=jupyter&logoColor=white" alt="jupyter" />
 <img src="https://img.shields.io/badge/json-808080?style=flat-square&logo=json&logoColor=white" alt="JSON" />
 
 <!-- Domains -->
@@ -256,6 +253,7 @@ Distributed under the MIT License. See [LICENSE](./LICENSE) for details.
 ## Author
 
 **Yasser BAOUZIL** – [GitHub](https://github.com/xxxxxxxx15339)
+
 
 
 
