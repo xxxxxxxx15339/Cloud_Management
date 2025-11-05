@@ -22,15 +22,12 @@
 <img src="https://img.shields.io/badge/Google--Test-34A853?style=flat-square&logo=google&logoColor=white" alt="Google Test" />
 
 <!-- Libraries -->
-<img src="https://img.shields.io/badge/sqlite3-003B57?style=flat-square&logo=sqlite&logoColor=white" alt="SQLite3" />
 <img src="https://img.shields.io/badge/json-808080?style=flat-square&logo=json&logoColor=white" alt="JSON" />
 
 <!-- Domains -->
 <img src="https://img.shields.io/badge/Kubernetes-326CE5?style=flat-square&logo=kubernetes&logoColor=white" alt="Kubernetes" />
 <img src="https://img.shields.io/badge/Smart--Pointers-3F51B5?style=flat-square&logo=code&logoColor=white" alt="Smart Pointers" />
 
-<!-- CI Badge -->
-<img src="https://github.com/xxxxxxxx15339/Cloud_Management/actions/workflows/ci.yml/badge.svg?style=flat-square" alt="CI Status" />
 
 </p>
 
@@ -253,6 +250,7 @@ Distributed under the MIT License. See [LICENSE](./LICENSE) for details.
 ## Author
 
 **Yasser BAOUZIL** – [GitHub](https://github.com/xxxxxxxx15339)
+
 
 
 
